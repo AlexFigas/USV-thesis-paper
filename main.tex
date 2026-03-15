@@ -38,7 +38,7 @@ alexfigas11@gmail.com}
 \maketitle
 
 \begin{abstract}
-This paper describes a cyber-physical system for autonomous unmanned surface vehicle (USV) control, developed through collaboration between Instituto Superior de Engenharia de Lisboa (ISEL) and Escola Superior Náutica Infante D. Henrique (ENIDH) institutions in Portugal. The system integrates independent motor control (up to four brushless thrusters), multi-sensor fusion (Global Positioning System (GPS), 9-axis Inertial Measurement Unit (IMU)), long-range LoRa (Long Range) communication, and modular software architecture. The platform was validated through staged testing including unit component verification, didactic robot integration, and field deployment during the REPMUS25 international maritime robotics exercise. The cost-effective design enables academic accessibility while maintaining operational capability for research and educational applications. Open-source code release promotes reproducibility and collaborative enhancement. Future development targets advanced control algorithms, energy sustainability through hybrid power systems, and expanded sensing for environmental monitoring applications. The Portuguese Exclusive Economic Zone (EEZ) provides natural deployment context for this scalable academic platform.
+This paper describes a cyber-physical system for autonomous unmanned surface vehicle (USV) control, developed through collaboration between Instituto Superior de Engenharia de Lisboa (ISEL) and Escola Superior Náutica Infante D. Henrique (ENIDH) institutions in Portugal. The system integrates independent motor control (multiple brushless thrusters), multi-sensor fusion (Global Positioning System (GPS), 9-axis Inertial Measurement Unit (IMU)), long-range LoRa (Long Range) communication, and modular software architecture. The platform was validated through staged testing including unit component verification, didactic robot integration, and field deployment during the REPMUS25 international maritime robotics exercise. The cost-effective design enables academic accessibility while maintaining operational capability for research and educational applications. Open-source code release promotes reproducibility and collaborative enhancement. Future development targets advanced control algorithms, energy sustainability through hybrid power systems, and expanded sensing for environmental monitoring applications. The Portuguese Exclusive Economic Zone (EEZ) provides natural deployment context for this scalable academic platform.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,10 +47,9 @@ USV; Cyber-Physical Systems; LoRa; ESP32; Autonomous Navigation; Protobuf.
 
 \section{Introduction}
 \label{sec:intro}
-This section introduces the context of USV development, presents the developed system, and outlines the paper structure.
 Unmanned Surface Vehicles (USV) represent increasingly important platforms for maritime robotics, oceanography, and environmental monitoring, enabling safe and efficient operations in areas difficult or dangerous for manned vessels. The development of cost-effective, modular, and academically accessible USV platforms remains a significant challenge in robotics research.
 
-This paper presents a comprehensive cyber-physical system for autonomous USV control, developed through collaboration between Instituto Superior de Engenharia de Lisboa (ISEL) and Escola Superior Náutica Infante D. Henrique (ENIDH). The system integrates independent motor control (up to four brushless thrusters), multi-sensor fusion (GPS, 9-axis IMU), long-range LoRa communication, and modular software architecture, demonstrating that academic institutions can develop capable maritime robotics platforms without the cost burden of commercial solutions.
+This paper presents a comprehensive cyber-physical system for autonomous USV control, developed through collaboration between Instituto Superior de Engenharia de Lisboa (ISEL) and Escola Superior Náutica Infante D. Henrique (ENIDH). The system integrates independent motor control (multiple brushless thrusters), multi-sensor fusion (GPS, 9-axis IMU), long-range LoRa communication, and modular software architecture, demonstrating that academic institutions can develop capable maritime robotics platforms without the cost burden of commercial solutions.
 
 A key innovation is the cost-effective implementation with modular design compared to commercial platforms (€300,000 \cite{wave-glider} --€500,000+ \cite{saildrone}), while maintaining functional equivalence for academic research applications. The system was validated through three testing phases: (1) unit component verification in laboratory environment; (2) integration validation using a two-wheeled differential drive didactic robot with a caster wheel, which shares the identical software framework; (3) field deployment during the REPMUS25 international maritime robotics exercise, conducted by the Portuguese Navy in collaboration with international academic institutions.
 
@@ -63,6 +62,9 @@ All code is released as open-source on GitHub \cite{github-usv} , promoting tran
 This section reviews existing USV platforms, comparing passive and active propulsion strategies, and positions the developed system within the current landscape.
 \subsection{Passive and Active Platform Comparison}
 USV development employs diverse propulsion strategies. Passive platforms (Wave Glider~\cite{wave-glider}, Saildrone~\cite{saildrone}) exploit renewable energy for multi-month endurance but sacrifice maneuverability. Motorized platforms (SR-Surveyor~\cite{sr-surveyor-class}, C-Cat 3~\cite{c-cat-3-asv}, Sea2Future~\cite{sea2future}) provide superior control at significantly higher cost. The developed system prioritizes cost-effectiveness and modularity while maintaining essential research functionality through commercial off-the-shelf components, 3D printing, and modular software architecture compatible with didactic robot framework~\cite{didactic-robot-thesis}.
+
+Table~\ref{tab:comparison} compares key parameters of the developed USV platform with commercial alternatives, highlighting the cost-effectiveness and modularity advantages.
+
 \begin{table}[htbp]
 \centering
 \caption{Comparison of USV Platforms}
@@ -74,7 +76,7 @@ USV development employs diverse propulsion strategies. Passive platforms (Wave G
 Length (cm) & 100 & 80 & 120+ \\
 Mass (kg) & 3.5 & 12 & 25+ \\
 Cost (EUR) & 200 & 2500 &  350,000+ \\
-Motors & 2/4 & 2 & 2/4 \\
+Motors & Multiple & 2 & 2/4 \\
 Range (m) & 500+ & 2000+ & 5000+ \\
 Modular & Yes & Partial & Limited \\
 \hline
@@ -86,6 +88,9 @@ Modular & Yes & Partial & Limited \\
 This section details the system architecture, covering hardware design, propulsion, electrical systems, communication, and software implementation.
 \subsection{Hardware Architecture}
 \subsubsection{Physical Platform}
+
+The hull adopts a catamaran configuration constructed from two parallel 3D-printed polycarbonate floats, each approximately $1 \, \mathrm{m}$ in length, as shown in Fig.~\ref{fig:usv-francisco}.
+
 \begin{figure}[h]
   \centering
   \includegraphics[width=1\linewidth]{figures/usv-francisco.png}
@@ -93,17 +98,17 @@ This section details the system architecture, covering hardware design, propulsi
   \label{fig:usv-francisco}
 \end{figure}
 
-The hull adopts a catamaran configuration constructed from two parallel 3D-printed polycarbonate floats, each approximately $1 \, \mathrm{m}$ in length, as shown in Fig.~\ref{fig:usv-francisco}. The floats provide primary buoyancy while their symmetric design minimizes hydrodynamic drag during forward motion. Central structural reinforcement employs fiberglass layering, increasing rigidity and withstanding impacts during field operations. A sealed central electronics enclosure houses the microcontroller, power distribution, and sensor systems, protecting sensitive electronics from water ingress and salt spray exposure.
+The floats provide primary buoyancy while their symmetric design minimizes hydrodynamic drag during forward motion. Central structural reinforcement employs fiberglass layering, increasing rigidity and withstanding impacts during field operations. A sealed central electronics enclosure houses the microcontroller, power distribution, and sensor systems, protecting sensitive electronics from water ingress and salt spray exposure.
 
 The 3D printing manufacturing approach enables rapid prototyping and iterative design improvements. The original design was produced using an Ender 3 printer modified with extended vertical axis to accommodate larger components. Post-processing with fiberglass reinforcement significantly improved mechanical durability for marine environments.
 
 \subsubsection{Propulsion System}
-The propulsion system accommodates up to four brushless electric motors configured for independent speed control. Each motor connects to an Electronic Speed Controller (ESC) receiving PWM signals from the main microcontroller. The PWM duty cycle ranges from $1000 \, \mu \mathrm{s}$ (minimum throttle) to $2000 \, \mu \mathrm{s}$ (maximum throttle), with $1500 \, \mu \mathrm{s}$ representing neutral/stop position. This standard RC convention enables straightforward integration with commercial motor drivers. The system supports various propulsion configurations: differential drive (two motors for turning), quadcopter-style control (four motors), or hybrid configurations.
+The propulsion system accommodates multiple brushless electric motors configured for independent speed control, limited only by the available GPIO pins on the port expander. Each motor connects to an Electronic Speed Controller (ESC) receiving PWM signals from the main microcontroller. The PWM duty cycle ranges from $1000 \, \mu \mathrm{s}$ (minimum throttle) to $2000 \, \mu \mathrm{s}$ (maximum throttle), with $1500 \, \mu \mathrm{s}$ representing neutral/stop position. This standard RC convention enables straightforward integration with commercial motor drivers. Unlike the didactic robot which requires 3 pins per motor for H-bridge control, the USV motors use Electronic Speed Controllers (ESCs) requiring only 1 pin per motor, allowing for up to 13 motors with the 16-pin expander (reserving 3 pins for LEDs). The system supports various propulsion configurations: differential drive (two motors for turning), quadcopter-style control (multiple motors), or hybrid configurations.
 
 \subsubsection{Electrical Architecture and I2C Bus}
 The electrical architecture employs an I2C (Inter-Integrated Circuit) bus to minimize wiring complexity while maintaining modularity. The central microcontroller interfaces with peripheral devices through I2C addresses: Global Positioning System (GPS) module (0x42), Inertial Measurement Unit (IMU) (0x69), and a 16-channel I/O Port Expander (0x27) providing digital outputs for motor ESC control and status LED indication. This bus topology enables up to 127 unique device addresses, supporting modular expansion without additional microcontroller GPIO pins.
 
-The Port Expander configuration provides 16 digital output channels extracted from merely 2 GPIO pins on the microcontroller (I2C SDA and SCL), enabling control of four independent motors plus 8 additional channels for future sensor integration or status indication. Power distribution employs dual $12 \, \mathrm{V}$ lithium battery cells: one dedicated to left thruster ESC and one to right thruster ESC, providing configuration flexibility for quad-motor expansion. A $5 \, \mathrm{V}$ boost converter powers the microcontroller and sensor modules, with reverse-polarity protection and fused distribution preventing cascade failures from individual component shorts.
+The Port Expander configuration provides 16 digital output channels extracted from merely 2 GPIO pins on the microcontroller (I2C SDA and SCL), enabling control of up to 13 independent motors (assuming 3 pins reserved for LEDs) plus additional channels for future sensor integration or status indication. Power distribution employs dual $12 \, \mathrm{V}$ lithium battery cells: one dedicated to left thruster ESC and one to right thruster ESC, providing configuration flexibility for multi-motor expansion. A $5 \, \mathrm{V}$ boost converter powers the microcontroller and sensor modules, with reverse-polarity protection and fused distribution preventing cascade failures from individual component shorts.
 
 \subsection{Communication Architecture}
 The system employs LoRa (Long Range) communication for extended operational ranges, supporting theoretical ranges exceeding $15 \, \mathrm{km}$ in open water under ideal atmospheric conditions. Commercial maritime radio often occupies adjacent frequency bands, necessitating careful frequency selection and antenna design. The platform utilizes LoRa SF7 (Spreading Factor 7) configuration balancing range and data rate at $50 \, \mathrm{kbps}$, adequate for telemetry streaming while minimizing battery consumption.
@@ -164,6 +169,8 @@ Experimental validation proceeded through staged implementation and testing phas
 \subsection{Development and Integration Phases}
 \subsubsection{Phase 1: PCB Validation with Didactic Robot}
 
+Initial validation employed the platform's original two-wheeled differential drive didactic robot with a caster wheel, which shares the same Robot framework and motor control interface. This strategy enabled early detection of PCB manufacturing defects and software integration issues without the complexity of unmanned vehicle field testing, as shown in Fig.~\ref{fig:pcb-final}. 
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=1\linewidth]{figures/pcb-final.png}
@@ -171,7 +178,7 @@ Experimental validation proceeded through staged implementation and testing phas
     \label{fig:pcb-final}
 \end{figure}
 
-Initial validation employed the platform's original two-wheeled differential drive didactic robot with a caster wheel, which shares the same Robot framework and motor control interface. This strategy enabled early detection of PCB manufacturing defects and software integration issues without the complexity of unmanned vehicle field testing. Testing verified correct functionality of all subsystems: motor control outputs generated PWM signals with duty cycles accurately mapping command values to thruster speeds; IMU data acquisition returned orientation data; GPS signal reception demonstrated adequate radio sensitivity for maritime operations; telemetry transmission demonstrated reliable LoRa packet reception at extended ranges.
+Testing verified correct functionality of all subsystems: motor control outputs generated PWM signals with duty cycles accurately mapping command values to thruster speeds; IMU data acquisition returned orientation data; GPS signal reception demonstrated adequate radio sensitivity for maritime operations; telemetry transmission demonstrated reliable LoRa packet reception at extended ranges.
 
 This phase identified and resolved hardware issues including motor controller calibration requirements, power distribution optimization, and thermal management. Software integration testing verified correct I2C bus operation, confirming register read/write operations for all peripheral devices. Didactic robot integration provided particular value in identifying and fixing EMI (electromagnetic interference) issues before field testing.
 
@@ -193,12 +200,12 @@ The system successfully executed autonomous navigation missions controlled throu
 \end{enumerate}
 
 \subsection{Comparative Platform Analysis}
-The developed USV demonstrates significant advantages over both the commercial Sea2Future platform and consumer research platforms. Table~\ref{tab:comparison} presents quantitative comparison across multiple dimensions.
+The developed USV demonstrates significant advantages over both the commercial Sea2Future platform and consumer research platforms. Table~\ref{tab:comparison2} presents quantitative comparison across multiple dimensions.
 
 \begin{table}[htbp]
 \centering
 \caption{Comparison of USV Platforms}
-\label{tab:comparison}
+\label{tab:comparison2}
 \begin{tabular}{|l|c|c|c|}
 \hline
 \textbf{Parameter} & \textbf{Developed} & \textbf{Sea2Future} & \textbf{Commercial} \\
@@ -206,7 +213,7 @@ The developed USV demonstrates significant advantages over both the commercial S
 Length (cm) & 100 & 80 & 120+ \\
 Mass (kg) & 3.5 & 12 & 25+ \\
 Cost (EUR) & 200 & 2500 &  350,000+ \\
-Motors & 2/4 & 2 & 2/4 \\
+Motors & Multiple & 2 & 2/4 \\
 Range (m) & 500+ & 2000+ & 5000+ \\
 Modular & Yes & Partial & Limited \\
 \hline
